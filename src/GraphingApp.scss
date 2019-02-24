@@ -1,0 +1,88 @@
+$break-small: 1000px;
+
+.tank-graphing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .header {
+    font-size: 26px;
+    padding: 16px;
+  }
+
+  .reload-button {
+    padding: 8px;
+    width: 136px;
+    height: 20px;
+    background: #8787f4;
+    font-size: 16px;
+  }
+
+  .tank-details-container {
+    display: flex;
+    padding: 16px;
+
+    .tank-details {
+      margin: 16px;
+      padding: 16px;
+
+      .tank-details-header {
+        font-weight: bold;
+        font-size: 24px;
+        text-decoration: underline;
+      }
+
+      .tank-details-rows {
+        text-align: left;
+
+        .tank-details-row {
+          padding: 4px 0;
+        }
+      }
+    }
+  }
+
+  .tank-chart {
+    height: 500px;
+  }
+
+  @media screen and (max-width: $break-small) {
+
+    .reload-button {
+      width: 50%;
+      height: 36px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .tank-details-container {
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+  }
+}
+
+.tank-graphing.loading {
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+
+  .pacman {
+    position: relative;
+    left: -43px;
+  }
+
+  .loading-message {
+    margin-top: 50px;
+  }
+}
+
+html, body, #root, .App {
+  height: 100%;
+  width: 100%;
+}
