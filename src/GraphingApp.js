@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import config from './config';
 import { load } from './helpers/spreadsheet';
 import { PacmanLoader } from 'react-spinners';
-import { keys, map, max, sum } from 'lodash';
+import { keys, map, max, min, sum } from 'lodash';
 import Moment from 'moment';
 import { VictoryChart, VictoryLine, VictoryTheme } from 'victory';
 
@@ -104,6 +104,7 @@ class GraphingApp extends Component {
     const readings = this.state.tankData[tank];
     const temps = map(readings, (reading) => ( reading.temp ));
     const maxTemp = max(temps);
+    const minTemp = min(temps);
     const avg = (sum(temps) / temps.length).toFixed(2);
     const lastReading = readings[readings.length - 1];
     return (
@@ -118,6 +119,9 @@ class GraphingApp extends Component {
           </div>
           <div className="tank-details-row">
             <span>{`Max Temperature: ${maxTemp}`}</span>
+          </div>
+          <div className="tank-details-row">
+            <span>{`Min Temperature: ${minTemp}`}</span>
           </div>
           <div className="tank-details-row">
             <span>{`Last Reading: ${lastReading.date} - ${lastReading.time}`}</span>
