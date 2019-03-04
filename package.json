@@ -10,7 +10,7 @@
     "react-dom": "^16.8.3",
     "react-scripts": "2.1.5",
     "react-spinners": "^0.5.1",
-    "victory": "^31.3.0"
+    "victory": "^32.0.0"
   },
   "scripts": {
     "start": "react-scripts start",

@@ -29,6 +29,18 @@ class GraphingApp extends Component {
       3: {
         data: { stroke: 'lightblue' }
       },
+      4: {
+        data: { stroke: 'red' }
+      },
+      5: {
+        data: { stroke: 'yellow' }
+      },
+      6: {
+        data: { stroke: 'purple' }
+      },
+      7: {
+        data: { stroke: 'black' }
+      },
     }
   };
   componentDidMount() {
@@ -40,7 +52,7 @@ class GraphingApp extends Component {
     if (this.state.loadingMessage) {
       return this.renderLoading();
     }
-    if (this.state.error ) {
+    if (this.state.error) {
       return <div>{this.state.error.message}</div>;
     }
     if (keys(this.state.tankData).length > 0) {
@@ -53,7 +65,7 @@ class GraphingApp extends Component {
         <div
           className="reload-button"
           onClick={() => {
-            this.setState({ loadingMessage: "Reloading data" }); load(this.onLoad)
+            this.setState({ loadingMessage: "Reloading data" }); this.reloadTemps()
           }}
         >
           Reload Tank Data
@@ -102,6 +114,9 @@ class GraphingApp extends Component {
 
   renderTankDetails = (tank) => {
     const readings = this.state.tankData[tank];
+    if (readings.length === 0) {
+      return null;
+    }
     const temps = map(readings, (reading) => ( reading.temp ));
     const maxTemp = max(temps);
     const minTemp = min(temps);
@@ -109,22 +124,26 @@ class GraphingApp extends Component {
     const lastReading = readings[readings.length - 1];
     return (
       <div className={`tank-details tank-details-${tank}`} style={{ background: this.state.chartStyles[tank].data.stroke }} key={`tank-details-${tank}`}>
-        <span className="tank-details-header">{`Tank ${tank} Details`}</span>
-        <div className="tank-details-rows">
-          <div className="tank-details-row">
-            <span>{`Last Temperature: ${temps[temps.length - 1]}`}</span>
-          </div>
-          <div className="tank-details-row">
-            <span>{`Average Temperature: ${avg}`}</span>
-          </div>
-          <div className="tank-details-row">
-            <span>{`Max Temperature: ${maxTemp}`}</span>
-          </div>
-          <div className="tank-details-row">
-            <span>{`Min Temperature: ${minTemp}`}</span>
-          </div>
-          <div className="tank-details-row">
-            <span>{`Last Reading: ${lastReading.date} - ${lastReading.time}`}</span>
+        <div className="tank-details-inner">
+          <span className="tank-details-header">{`Tank ${tank} Details`}</span>
+          <div className="tank-details-rows">
+            <div className="tank-details-row">
+              <span className="tank-last-temperature">
+                {temps[temps.length - 1]}
+                <span className="temp-indicator-degrees">o</span>
+                <span className="temp-indicator-celcius">C</span>
+              </span>
+              <span className="tank-last-time">{lastReading.date} - {lastReading.time}</span>
+            </div>
+            <div className="tank-details-row">
+              <span>{`Average: ${avg}`}</span>
+            </div>
+            <div className="tank-details-row">
+              <span>{`Max: ${maxTemp}`}</span>
+            </div>
+            <div className="tank-details-row">
+              <span>{`Min: ${minTemp}`}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -154,9 +173,14 @@ class GraphingApp extends Component {
         discoveryDocs: ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
         scope: config.scope,
       }).then(() => {
-        load(this.onLoad)
+        this.reloadTemps();
       });
   };
+
+  reloadTemps = () => {
+    load('Hot', this.onHotTempLoad)
+    load('Cold', this.onColdTempLoad)
+  }
 
   sendAuthorizedApiRequest = (request) => {
     this.setState({ currentApiRequest: request });
@@ -185,16 +209,29 @@ class GraphingApp extends Component {
     }
   }
 
-  onLoad = (data, error) => {
+  onHotTempLoad = (data, error) => {
     if (data) {
       this.setState({ loadingMessage: "Parsing Data" });
-      this.parseData(data);
+      this.parseHotData(data);
     } else {
       this.setState({ error, loadingMessage: null });
     }
   }
 
-  parseData = (data) => {
+  onColdTempLoad = (data, error) => {
+    if (data) {
+      this.setState({ loadingMessage: "Parsing Data" });
+      this.parseColdData(data);
+    } else {
+      this.setState({ error, loadingMessage: null });
+    }
+  }
+
+  parseHotData = (data) => {
+    if (!data.data) {
+      this.setState({ loadingMessage: null });
+      return;
+    }
     const tanks = {
       1: [],
       2: [],
@@ -204,7 +241,34 @@ class GraphingApp extends Component {
       const obj = this.genDataObject(reading);
       tanks[obj.tank].push(obj);
     });
-    this.setState({tankData: tanks});
+    const { tankData } = this.state;
+    map(keys(tanks), (tank) => {
+      tankData[tank] = tanks[tank];
+    });
+    this.setState({ tankData: tankData });
+    this.setState({ loadingMessage: null });
+  }
+
+  parseColdData = (data) => {
+    if (!data.data) {
+      this.setState({ loadingMessage: null });
+      return;
+    }
+    const tanks = {
+      4: [],
+      5: [],
+      6: [],
+      7: [],
+    };
+    map(data.data.slice(-96), (reading) => {
+      const obj = this.genDataObject(reading);
+      tanks[obj.tank].push(obj);
+    });
+    const { tankData } = this.state;
+    map(keys(tanks), (tank) => {
+      tankData[tank] = tanks[tank];
+    });
+    this.setState({ tankData: tankData });
     this.setState({ loadingMessage: null });
   }
 }

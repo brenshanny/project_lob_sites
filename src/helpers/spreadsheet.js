@@ -1,11 +1,11 @@
 import config from "../config";
 
-export function load(callback) {
+export function load(tank, callback) {
   window.gapi.client.load("sheets", "v4", () => {
     window.gapi.client.sheets.spreadsheets.values
       .get({
         spreadsheetId: config.spreadsheetId,
-        range: "Sheet1!A4:T"
+        range: `${tank} Lobster Temps!A2:T`
       })
       .then(
         response => {
